@@ -9,6 +9,35 @@ import SignUp from './components/SignUp/SignUp'
 import SignIn from './components/SignIn/SignIn'
 import SignOut from './components/SignOut/SignOut'
 import ChangePassword from './components/ChangePassword/ChangePassword'
+import Game from './components/Game/Game'
+
+import deck from './data/llpsi.json'
+const allTags = deck.notes.map(note => note.tags.map(tag => tag.toLowerCase())).flat()
+const uniqueTags = [...new Set(allTags)].sort()
+
+// https://stackoverflow.com/a/822486/3500171
+const stripHtml = html => {
+  const tmp = document.createElement('DIV')
+  tmp.innerHTML = html
+  return tmp.textContent || tmp.innerText || ''
+}
+
+// remove html from fields
+deck.notes.forEach(note => {
+  note.fields = note.fields.map(field => stripHtml(field))
+  note.latinField = note.fields[0]
+  note.englishField = note.fields[3]
+  note.soundField = note.fields[6]
+  if (note.soundField.length > 0) {
+    const colonIndex = note.soundField.indexOf(':')
+    const closingBracketIndex = note.soundField.indexOf(']')
+    note.soundUrl = 'media/' + note.soundField.slice(colonIndex + 1, closingBracketIndex)
+  } else {
+    note.soundUrl = ''
+  }
+})
+
+deck.notes = deck.notes.filter(note => note.latinField.trim().length > 0 && note.englishField.trim().length > 0)
 
 class App extends Component {
   constructor (props) {
@@ -53,6 +82,9 @@ class App extends Component {
           />
         ))}
         <main className="container">
+          <Route path='/game' render={() => (
+            <Game msgAlert={this.msgAlert} allNotes={deck.notes} uniqueTags={uniqueTags} />
+          )} />
           <Route path='/sign-up' render={() => (
             <SignUp msgAlert={this.msgAlert} setUser={this.setUser} />
           )} />
