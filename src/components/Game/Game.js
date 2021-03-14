@@ -93,6 +93,9 @@ const Game = ({ allNotes, uniqueTags }) => {
     if (answerNote[questionField] !== note[questionField]) {
       setIncorrectNotes(incorrectNotes => [...incorrectNotes, answerNote])
     }
+
+    // scroll to bottom
+    setTimeout(() => window.scrollTo(0, document.body.scrollHeight), 100)
   }
 
   const questionJsx = answerNote && (
