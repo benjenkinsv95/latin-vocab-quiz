@@ -6,37 +6,60 @@ import ListGroup from 'react-bootstrap/ListGroup'
 import Button from 'react-bootstrap/Button'
 import Accordion from 'react-bootstrap/Accordion'
 import Card from 'react-bootstrap/Card'
+import { knuthShuffle as shuffle } from 'knuth-shuffle'
 
 import FilterNotes from '../FilterNotes/FilterNotes'
 
 const Game = ({ allNotes, uniqueTags }) => {
-  const [filteredNotes, setFilteredNotes] = useState([])
-  const [questionNotes, setQuestionNotes] = useState([])
-  const [answerNote, setAnswerNote] = useState(null)
-  const [playAudio, { stop: stopAudio }] = useSound(answerNote ? answerNote.soundUrl : null)
-  const [showAnswer, setShowAnswer] = useState(false)
-  const [correctAnswer, setCorrectAnswer] = useState(false)
-  const [selectedAnswerNote, setSelectedAnswerNote] = useState(null)
-  const [answerNoteIndex, setAnswerNoteIndex] = useState(0)
-  const [isQuestionLatin, setIsQuestionLatin] = useState(true)
+  // All notes that match the filters
+  const [allFilteredNotes, setAllFilteredNotes] = useState([])
+  // All notes that were incorrect
   const [incorrectNotes, setIncorrectNotes] = useState([])
+  // The current question notes. Either allFilteredNotes or the incorrectNotes fo review
+  const [questionNotes, setQuestionNotes] = useState([])
+  // The notes used for possible answers
+  const [possibleAnswerNotes, setPossibleAnswerNotes] = useState([])
+
+  // The note that is the correct answer and the note the user selected
+  const [correctAnswerNote, setCorrectAnswerNote] = useState(null)
+  const [selectedAnswerNote, setSelectedAnswerNote] = useState(null)
+
+  // True if we should show the answer (happens after clicking an answer)
+  const [showAnswer, setShowAnswer] = useState(false)
+
+  // The index of the current answer being quizzed on in questionNotes
+  const [correctAnswerNoteIndex, setCorrectAnswerNoteIndex] = useState(0)
+  const [onLastAnswer, setOnLastAnswer] = useState(false)
+  const [isReviewMode, setReviewMode] = useState(false)
+
+  // If true, the question is latin and the answer is in english
+  const [isQuestionLatin, setIsQuestionLatin] = useState(true)
   const questionField = isQuestionLatin ? 'latinField' : 'englishField'
   const answerField = isQuestionLatin ? 'englishField' : 'latinField'
 
+  // returns true if the correct answer and selected answer are the same
+  const isSelectedAnswerCorrect = () => selectedAnswerNote && correctAnswerNote && selectedAnswerNote.latinField === correctAnswerNote.latinField
+
+  // the audio for the current latin word
+  const [playAudio, { stop: stopAudio }] = useSound(correctAnswerNote ? correctAnswerNote.soundUrl : null)
+
+  // When there are new filtered cards or someone clicks the next question button
   const handleNextQuestion = () => {
-    if (filteredNotes.length <= 4) {
-      return
-    }
-    const filteredNotesCopy = filteredNotes.map(note => note)
-    const randomNotes = []
+    console.log('handleNextQuestion', correctAnswerNoteIndex)
+    console.log('questionNotes', questionNotes, correctAnswerNoteIndex)
+    const correctAnswerNote = questionNotes[correctAnswerNoteIndex]
+    const allFilteredNotesCopy = allFilteredNotes
+      .map(note => note)
+      .filter(note => note.latinField !== correctAnswerNote.latinField)
+
+    const randomNotes = [correctAnswerNote]
+
     while (randomNotes.length < 4) {
-      const randomIndex = randomNotes.length === 0 ? answerNoteIndex : Math.floor(Math.random() * filteredNotesCopy.length)
-      const randomNote = filteredNotesCopy[randomIndex]
-      filteredNotesCopy.splice(randomIndex, 1)
+      const randomIndex = randomNotes.length === 0 ? correctAnswerNoteIndex : Math.floor(Math.random() * allFilteredNotesCopy.length)
+      const randomNote = allFilteredNotesCopy[randomIndex]
+      allFilteredNotesCopy.splice(randomIndex, 1)
       randomNotes.push(randomNote)
     }
-
-    const answerNote = randomNotes[0]
 
     // https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/sort
     randomNotes.sort((note1, note2) => {
@@ -49,33 +72,45 @@ const Game = ({ allNotes, uniqueTags }) => {
       }
       return 0
     })
-    setQuestionNotes(randomNotes)
+    setPossibleAnswerNotes(randomNotes)
 
     // delay setting answer note because of use-sound race condition
     setTimeout(() => {
-      setAnswerNote(answerNote)
+      setCorrectAnswerNote(correctAnswerNote)
       setShowAnswer(false)
       // set the next answer note to the next filtered card
-      setAnswerNoteIndex(answerNoteIndex => (answerNoteIndex + 1) % filteredNotes.length)
+      setCorrectAnswerNoteIndex(correctAnswerNoteIndex => (correctAnswerNoteIndex + 1) % questionNotes.length)
+      if (correctAnswerNoteIndex === questionNotes.length - 1) {
+        setOnLastAnswer(true)
+      }
     }, 100)
-    console.log('answerNote', answerNote)
 
     stopAudio()
   }
 
+  // if the question notes change
   useEffect(() => {
-    if (filteredNotes.length > 4) {
+    if (allFilteredNotes.length > 4) {
+      // reset the correct answer index
+      setCorrectAnswerNoteIndex(0)
+      // call handle next question
       handleNextQuestion()
-      setAnswerNoteIndex(0)
     }
-  }, [filteredNotes])
+  }, [questionNotes])
 
+  // if the audio changes, play it
   useEffect(() => {
-    if (answerNote && isQuestionLatin) {
+    if (correctAnswerNote && isQuestionLatin) {
       playAudio()
-      console.log('playing audio', answerNote ? answerNote.soundUrl : '')
     }
   }, [playAudio])
+
+  const startReview = () => {
+    setCorrectAnswerNoteIndex(0)
+    setIncorrectNotes([])
+    setQuestionNotes(shuffle(incorrectNotes))
+    setReviewMode(true)
+  }
 
   const checkAnswer = note => {
     // we're already showing the answer, ignore this click
@@ -83,32 +118,41 @@ const Game = ({ allNotes, uniqueTags }) => {
       return
     }
 
+    // show the answer
     setShowAnswer(true)
-    setCorrectAnswer(answerNote[questionField] === note[questionField])
+
+    // set which answer was selected
     setSelectedAnswerNote(note)
-    if (answerNote && !isQuestionLatin) {
+
+    // if the question is in english, play the latin answer's audio
+    if (correctAnswerNote && !isQuestionLatin) {
       playAudio()
     }
 
-    if (answerNote[questionField] !== note[questionField]) {
-      setIncorrectNotes(incorrectNotes => [...incorrectNotes, answerNote])
+    // Add incorrect answers to the state
+    if (correctAnswerNote[questionField] !== note[questionField]) {
+      setIncorrectNotes(incorrectNotes => [...incorrectNotes, correctAnswerNote])
     }
 
     // scroll to bottom
     setTimeout(() => window.scrollTo(0, document.body.scrollHeight), 100)
   }
 
-  const questionJsx = answerNote && (
+  // Show the question. With play audio button and what question number we are on
+  const questionJsx = correctAnswerNote && allFilteredNotes.length > 4 && (
     <h1 className="mt-3 mb-0 px-2 py-1 bg-secondary text-white">
       {(isQuestionLatin || showAnswer) && <span style={{ cursor: 'pointer' }} onClick={playAudio}>▶️</span>}
-      {' '}{answerNote[questionField]} ({answerNoteIndex !== 0 ? answerNoteIndex : filteredNotes.length}/{filteredNotes.length})
+      {' '}{correctAnswerNote[questionField]} ({correctAnswerNoteIndex !== 0 ? correctAnswerNoteIndex : questionNotes.length}/{questionNotes.length})
     </h1>
   )
-  const notesJsx = answerNote && questionNotes.map((note, i) => {
+
+  // Create the possible answers.
+  const possibleAnswerNotesJsx = correctAnswerNote && allFilteredNotes.length > 4 && possibleAnswerNotes.map((note, i) => {
+    // Style them based on if the question was correct
     let variant = ''
-    if (showAnswer && answerNote[questionField] === note[questionField]) {
+    if (showAnswer && correctAnswerNote[questionField] === note[questionField]) {
       variant = 'success'
-    } else if (showAnswer && !correctAnswer && selectedAnswerNote[questionField] === note[questionField]) {
+    } else if (showAnswer && !isSelectedAnswerCorrect() && selectedAnswerNote[questionField] === note[questionField]) {
       variant = 'danger'
     }
 
@@ -119,10 +163,36 @@ const Game = ({ allNotes, uniqueTags }) => {
     )
   })
 
-  const nextQuestionButtonJsx = showAnswer && (
-    <Button className='text-white' variant="primary" size="lg" onClick={handleNextQuestion}>
+  const reviewButtonJsx = incorrectNotes.length > 0 && (
+    <Button className='text-white' variant="secondary" size="lg" onClick={startReview}>
+      Review
+    </Button>
+  )
+
+  const nextQuestionButtonJsx = (
+    <Button className='text-white ml-2' variant="primary" size="lg" onClick={() => {
+      if (onLastAnswer) {
+        setCorrectAnswerNoteIndex(0)
+        setOnLastAnswer(false)
+        setQuestionNotes(shuffle(allFilteredNotes))
+        setReviewMode(false)
+      }
+
+      // FIXME: For some reason when I finish review mode it goes to the next question.
+      // but it doesn't for the normal mode
+      console.log(isReviewMode, onLastAnswer)
+      if (!(isReviewMode && onLastAnswer)) {
+        handleNextQuestion()
+      }
+    }}>
       Next Question
     </Button>
+  )
+
+  const buttonsJsx = showAnswer && (
+    <div style={{ display: 'flex', width: '100%', justifyContent: 'flex-end' }}>
+      {reviewButtonJsx} {nextQuestionButtonJsx}
+    </div>
   )
 
   const incorrectNotesJsx = incorrectNotes.length > 0 && (
@@ -155,26 +225,27 @@ const Game = ({ allNotes, uniqueTags }) => {
         <ListGroup horizontal className='mb-2'>
           <ListGroup.Item
             action
-            className={isQuestionLatin && 'text-white'}
-            variant={isQuestionLatin && 'primary'}
+            className={isQuestionLatin && 'text-white bg-primary'}
             onClick={() => setIsQuestionLatin(true)}>
             <strong>Latin</strong>
           </ListGroup.Item>
           <ListGroup.Item
             action
-            className={!isQuestionLatin && 'text-white'}
-            variant={!isQuestionLatin && 'primary'}
+            className={!isQuestionLatin && 'text-white bg-primary'}
             onClick={() => setIsQuestionLatin(false)}>
             <strong>English</strong>
           </ListGroup.Item>
         </ListGroup>
-        <FilterNotes action allNotes={allNotes} uniqueTags={uniqueTags} setFilteredNotes={setFilteredNotes} />
+        <FilterNotes action allNotes={allNotes} uniqueTags={uniqueTags} setAllFilteredNotes={(filteredNotes) => {
+          setAllFilteredNotes(filteredNotes)
+          setQuestionNotes(filteredNotes)
+        }} />
         {questionJsx}
-        <ListGroup>
-          {notesJsx}
+        <ListGroup className='mb-1'>
+          {possibleAnswerNotesJsx}
         </ListGroup>
 
-        {nextQuestionButtonJsx}
+        {buttonsJsx}
         {incorrectNotesJsx}
       </div>
     </div>

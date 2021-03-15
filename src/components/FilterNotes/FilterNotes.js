@@ -8,13 +8,13 @@ const loadSelectedValues = () => {
   return JSON.parse(selectedValues)
 }
 
-const FilterNotes = ({ allNotes, uniqueTags, setFilteredNotes }) => {
+const FilterNotes = ({ allNotes, uniqueTags, setAllFilteredNotes }) => {
   const uniqueTagsOptions = uniqueTags.map((tag, i) => ({ name: tag, id: i + 1 }))
 
   const setSelectedList = (selectedList) => {
     const newFilteredTags = selectedList.map(option => option.name)
     const filteredNotes = allNotes.filter(note => note.tags.some(tag => newFilteredTags.includes(tag.toLowerCase())))
-    setFilteredNotes(shuffle(filteredNotes))
+    setAllFilteredNotes(shuffle(filteredNotes))
     localStorage.setItem('selectedValues', JSON.stringify(selectedList))
   }
 
