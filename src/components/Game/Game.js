@@ -111,6 +111,7 @@ const Game = ({ allNotes, uniqueTags }) => {
     setIncorrectNotes([])
     setQuestionNotes(shuffle(incorrectNotes))
     setReviewMode(true)
+    setOnLastAnswer(false)
     setRequestNextQuestion(true)
   }
 
