@@ -1,1 +1,10 @@
+$primary: #2a9d8f;
+$secondary: #f4a261;
+
+
 @import '~bootstrap/scss/bootstrap';
+
+.optionContainer li:hover, .optionContainer .highlight {
+  background: #2a9d8f!important;
+  color: #fff!important;
+}

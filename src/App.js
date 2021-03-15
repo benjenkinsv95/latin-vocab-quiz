@@ -82,7 +82,11 @@ class App extends Component {
           />
         ))}
         <main className="container">
-          <Route path='/game' render={() => (
+          {/* TODO: Eventually replace with an actual home page */}
+          <Route exact path='/' render={() => (
+            <Game msgAlert={this.msgAlert} allNotes={deck.notes} uniqueTags={uniqueTags} />
+          )} />
+          <Route exact path='/game' render={() => (
             <Game msgAlert={this.msgAlert} allNotes={deck.notes} uniqueTags={uniqueTags} />
           )} />
           <Route path='/sign-up' render={() => (

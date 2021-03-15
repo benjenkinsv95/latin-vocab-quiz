@@ -24,8 +24,16 @@ const FilterNotes = ({ allNotes, uniqueTags, setFilteredNotes }) => {
 
   return (
     <div>
-      <h4>Filter by Tag</h4>
+      <h4 className='text-secondary'>Filter by Tag</h4>
       <Multiselect
+        style={{
+          chips: {
+            backgroundColor: '#2a9d8f'
+          },
+          option: { // To change css for dropdown options
+            color: '#2a9d8f'
+          }
+        }}
         options={uniqueTagsOptions} // Options to display in the dropdown
         selectedValues={loadSelectedValues()} // Preselected value to persist in dropdown
         onSelect={setSelectedList} // Function will trigger on select event

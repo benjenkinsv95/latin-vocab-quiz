@@ -99,8 +99,9 @@ const Game = ({ allNotes, uniqueTags }) => {
   }
 
   const questionJsx = answerNote && (
-    <h1 className="mt-3 mb-2">
-      {(isQuestionLatin || showAnswer) && <span onClick={playAudio}>▶️</span>} {answerNote[questionField]} ({answerNoteIndex}/{filteredNotes.length})
+    <h1 className="mt-3 mb-0 px-2 py-1 bg-secondary text-white">
+      {(isQuestionLatin || showAnswer) && <span style={{ cursor: 'pointer' }} onClick={playAudio}>▶️</span>}
+      {' '}{answerNote[questionField]} ({answerNoteIndex !== 0 ? answerNoteIndex : filteredNotes.length}/{filteredNotes.length})
     </h1>
   )
   const notesJsx = answerNote && questionNotes.map((note, i) => {
@@ -119,7 +120,7 @@ const Game = ({ allNotes, uniqueTags }) => {
   })
 
   const nextQuestionButtonJsx = showAnswer && (
-    <Button variant="primary" size="lg" onClick={handleNextQuestion}>
+    <Button className='text-white' variant="primary" size="lg" onClick={handleNextQuestion}>
       Next Question
     </Button>
   )
@@ -148,9 +149,9 @@ const Game = ({ allNotes, uniqueTags }) => {
 
   return (
     <div className="row">
-      <div className="col-sm-10 col-md-8 mx-auto mt-5">
-        <h3>Vocab Game</h3>
-        <h4>Question Language</h4>
+      <div className="col-sm-10 col-md-8 mx-auto mt-3">
+        <h3 className='text-primary'>Vocab Game</h3>
+        <h4 className='text-secondary'>Question Language</h4>
         <ListGroup horizontal className='mb-2'>
           <ListGroup.Item
             action
