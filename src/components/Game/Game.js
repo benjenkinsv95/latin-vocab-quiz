@@ -31,6 +31,7 @@ const Game = ({ allNotes, uniqueTags }) => {
   const [correctAnswerNoteIndex, setCorrectAnswerNoteIndex] = useState(0)
   const [onLastAnswer, setOnLastAnswer] = useState(false)
   const [isReviewMode, setReviewMode] = useState(false)
+  const [requestNextQuestion, setRequestNextQuestion] = useState(false)
 
   // If true, the question is latin and the answer is in english
   const [isQuestionLatin, setIsQuestionLatin] = useState(true)
@@ -50,7 +51,7 @@ const Game = ({ allNotes, uniqueTags }) => {
     const correctAnswerNote = questionNotes[correctAnswerNoteIndex]
     const allFilteredNotesCopy = allFilteredNotes
       .map(note => note)
-      .filter(note => note.latinField !== correctAnswerNote.latinField)
+      .filter(note => correctAnswerNote && note.latinField !== correctAnswerNote.latinField)
 
     const randomNotes = [correctAnswerNote]
 
@@ -90,13 +91,13 @@ const Game = ({ allNotes, uniqueTags }) => {
 
   // if the question notes change
   useEffect(() => {
-    if (allFilteredNotes.length > 4) {
-      // reset the correct answer index
-      setCorrectAnswerNoteIndex(0)
-      // call handle next question
+    if (allFilteredNotes.length > 4 && requestNextQuestion) {
       handleNextQuestion()
     }
-  }, [questionNotes])
+    if (requestNextQuestion) {
+      setRequestNextQuestion(false)
+    }
+  }, [requestNextQuestion])
 
   // if the audio changes, play it
   useEffect(() => {
@@ -110,6 +111,7 @@ const Game = ({ allNotes, uniqueTags }) => {
     setIncorrectNotes([])
     setQuestionNotes(shuffle(incorrectNotes))
     setReviewMode(true)
+    setRequestNextQuestion(true)
   }
 
   const checkAnswer = note => {
@@ -181,9 +183,9 @@ const Game = ({ allNotes, uniqueTags }) => {
       // FIXME: For some reason when I finish review mode it goes to the next question.
       // but it doesn't for the normal mode
       console.log(isReviewMode, onLastAnswer)
-      if (!(isReviewMode && onLastAnswer)) {
-        handleNextQuestion()
-      }
+      // if (!(isReviewMode && onLastAnswer)) {
+      setRequestNextQuestion(true)
+      // }
     }}>
       Next Question
     </Button>
@@ -239,6 +241,12 @@ const Game = ({ allNotes, uniqueTags }) => {
         <FilterNotes action allNotes={allNotes} uniqueTags={uniqueTags} setAllFilteredNotes={(filteredNotes) => {
           setAllFilteredNotes(filteredNotes)
           setQuestionNotes(filteredNotes)
+          // reset the correct answer index
+          setCorrectAnswerNoteIndex(0)
+          setOnLastAnswer(false)
+          setReviewMode(false)
+          // call handle next question
+          setRequestNextQuestion(true)
         }} />
         {questionJsx}
         <ListGroup className='mb-1'>
