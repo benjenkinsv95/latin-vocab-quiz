@@ -26,8 +26,8 @@ const stripHtml = html => {
 deck.notes.forEach(note => {
   note.fields = note.fields.map(field => stripHtml(field))
   note.latinField = note.fields[0]
-  note.englishField = note.fields[3]
-  note.soundField = note.fields[6]
+  note.englishField = note.fields[1]
+  note.soundField = note.fields[2]
   if (note.soundField.length > 0) {
     const colonIndex = note.soundField.indexOf(':')
     const closingBracketIndex = note.soundField.indexOf(']')
