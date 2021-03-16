@@ -221,8 +221,8 @@ const Game = ({ allNotes, uniqueTags }) => {
   )
 
   return (
-    <div className="row">
-      <div className="col-sm-10 col-md-8 mx-auto mt-3">
+    <div className="row h-100">
+      <div className={'col-sm-10 col-md-8 mx-auto my-auto bg-white px-3 py-3 rounded'}>
         <h3 className='text-primary'>Vocab Game</h3>
         <h4 className='text-secondary'>Question Language</h4>
         <ListGroup horizontal className='mb-2'>

@@ -8,3 +8,18 @@ $secondary: #f4a261;
   background: #2a9d8f!important;
   color: #fff!important;
 }
+
+body {
+  background: rgb(42,157,143);
+  background: linear-gradient(18deg, rgba(42,157,143,1) 0%, rgba(233,196,106,1) 50%, rgba(244,162,97,1) 100%);
+}
+
+#root, body, html {
+  width: 100%;
+  min-height: 100vh;
+  height: auto;
+}
+
+main {
+  height: calc(100vh - 40px)!important;
+}

@@ -1,42 +1,40 @@
-import React, { Fragment } from 'react'
-import Nav from 'react-bootstrap/Nav'
+import React from 'react'
+// import Nav from 'react-bootstrap/Nav'
 import Navbar from 'react-bootstrap/Navbar'
 
-const authenticatedOptions = (
-  <Fragment>
-    <Nav.Link href="#change-password">Change Password</Nav.Link>
-    <Nav.Link href="#sign-out">Sign Out</Nav.Link>
-  </Fragment>
-)
-
-const unauthenticatedOptions = (
-  <Fragment>
-    {/*
-    <Nav.Link href="#sign-up">Sign Up</Nav.Link>
-    <Nav.Link href="#sign-in">Sign In</Nav.Link>
-    */}
-  </Fragment>
-)
-
-const alwaysOptions = (
-  <Fragment>
-    <Nav.Link href="#/">Home</Nav.Link>
-  </Fragment>
-)
+// const authenticatedOptions = (
+//   <Fragment>
+//     <Nav.Link href="#change-password">Change Password</Nav.Link>
+//     <Nav.Link href="#sign-out">Sign Out</Nav.Link>
+//   </Fragment>
+// )
+//
+// const unauthenticatedOptions = (
+//   <Fragment>
+//     {/*
+//     <Nav.Link href="#sign-up">Sign Up</Nav.Link>
+//     <Nav.Link href="#sign-in">Sign In</Nav.Link>
+//     */}
+//   </Fragment>
+// )
+//
+// const alwaysOptions = (
+//   <Fragment>
+//     <Nav.Link href="#/">Home</Nav.Link>
+//   </Fragment>
+// )
 
 const Header = ({ user }) => (
   <Navbar bg="primary" variant="dark" expand="md">
-    <Navbar.Brand href="#">
-      Latin Vocab Game
-    </Navbar.Brand>
-    <Navbar.Toggle aria-controls="basic-navbar-nav" />
-    <Navbar.Collapse id="basic-navbar-nav">
-      <Nav className="ml-auto">
-        { user && <span className="navbar-text mr-2">Welcome, {user.email}</span>}
-        { alwaysOptions }
-        { user ? authenticatedOptions : unauthenticatedOptions }
-      </Nav>
-    </Navbar.Collapse>
+    <div className='container'>
+      <div className='row w-100'>
+        <div className="col-sm-10 col-md-8 mx-auto">
+          <Navbar.Brand href="#" style={{ fontWeight: '700' }}>
+            Latin Vocab Game
+          </Navbar.Brand>
+        </div>
+      </div>
+    </div>
   </Navbar>
 )
 
