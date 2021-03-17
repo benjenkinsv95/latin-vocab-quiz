@@ -30,13 +30,14 @@ const Game = ({ allNotes, uniqueTags }) => {
   // The index of the current answer being quizzed on in questionNotes
   const [correctAnswerNoteIndex, setCorrectAnswerNoteIndex] = useState(0)
   const [onLastAnswer, setOnLastAnswer] = useState(false)
-  const [isReviewMode, setReviewMode] = useState(false)
   const [requestNextQuestion, setRequestNextQuestion] = useState(false)
 
   // If true, the question is latin and the answer is in english
   const [isQuestionLatin, setIsQuestionLatin] = useState(true)
   const questionField = isQuestionLatin ? 'latinField' : 'englishField'
   const answerField = isQuestionLatin ? 'englishField' : 'latinField'
+
+  const isSmallScreen = window.innerWidth <= 576
 
   // returns true if the correct answer and selected answer are the same
   const isSelectedAnswerCorrect = () => selectedAnswerNote && correctAnswerNote && selectedAnswerNote.latinField === correctAnswerNote.latinField
@@ -110,7 +111,6 @@ const Game = ({ allNotes, uniqueTags }) => {
     setCorrectAnswerNoteIndex(0)
     setIncorrectNotes([])
     setQuestionNotes(shuffle(incorrectNotes))
-    setReviewMode(true)
     setOnLastAnswer(false)
     setRequestNextQuestion(true)
   }
@@ -167,34 +167,39 @@ const Game = ({ allNotes, uniqueTags }) => {
   })
 
   const reviewButtonJsx = incorrectNotes.length > 0 && (
-    <Button className='text-white' variant="secondary" size="lg" onClick={startReview}>
+    <Button className={`text-white ${isSmallScreen ? 'btn-block mb-2' : ''}`} variant="secondary" size="lg" onClick={startReview}>
       Review
     </Button>
   )
 
-  const nextQuestionButtonJsx = (
-    <Button className='text-white ml-2' variant="primary" size="lg" onClick={() => {
-      if (onLastAnswer) {
-        setCorrectAnswerNoteIndex(0)
-        setOnLastAnswer(false)
-        setQuestionNotes(shuffle(allFilteredNotes))
-        setReviewMode(false)
-      }
+  const handleNextQuestionButton = () => {
+    if (onLastAnswer) {
+      setCorrectAnswerNoteIndex(0)
+      setOnLastAnswer(false)
+      setQuestionNotes(shuffle(allFilteredNotes))
+    }
 
-      // FIXME: For some reason when I finish review mode it goes to the next question.
-      // but it doesn't for the normal mode
-      console.log(isReviewMode, onLastAnswer)
-      // if (!(isReviewMode && onLastAnswer)) {
-      setRequestNextQuestion(true)
-      // }
-    }}>
+    setRequestNextQuestion(true)
+  }
+
+  const nextQuestionButtonJsx = (
+    <Button className={`text-white ${isSmallScreen ? 'btn-block' : 'ml-2'}`} variant="primary" size="lg" onClick={handleNextQuestionButton}>
       Next Question
     </Button>
   )
 
+  const addToReviewButtonJsx = (
+    isSelectedAnswerCorrect() && <Button className={`text-white ${isSmallScreen ? 'btn-block mb-2' : 'ml-2'}`} variant="secondary" size="lg" onClick={() => {
+      setIncorrectNotes(incorrectNotes => [...incorrectNotes, correctAnswerNote])
+      handleNextQuestionButton()
+    }}>
+      Add to Reviews
+    </Button>
+  )
+
   const buttonsJsx = showAnswer && (
-    <div style={{ display: 'flex', width: '100%', justifyContent: 'flex-end' }}>
-      {reviewButtonJsx} {nextQuestionButtonJsx}
+    <div style={{ display: 'flex', width: '100%', justifyContent: 'space-between', flexDirection: isSmallScreen ? 'column' : 'row ' }}>
+      <span>{reviewButtonJsx}</span> <span>{addToReviewButtonJsx} {nextQuestionButtonJsx}</span>
     </div>
   )
 
@@ -205,7 +210,7 @@ const Game = ({ allNotes, uniqueTags }) => {
           color: '#721c24',
           backgroundColor: '#f5c6cb'
         }}>
-          Incorrect Answers (Click to Show/Hide)
+          Review Vocab (Click to Show/Hide)
         </Accordion.Toggle>
         <Accordion.Collapse eventKey="0">
           <ListGroup>
@@ -245,7 +250,6 @@ const Game = ({ allNotes, uniqueTags }) => {
           // reset the correct answer index
           setCorrectAnswerNoteIndex(0)
           setOnLastAnswer(false)
-          setReviewMode(false)
           // call handle next question
           setRequestNextQuestion(true)
         }} />
