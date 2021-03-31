@@ -1,6 +1,6 @@
 {
-  "name": "latin-vocab-game",
-  "homepage": "https://benjenkinsv95.github.io/latin-vocab-game",
+  "name": "latin-vocab-quiz",
+  "homepage": "https://benjenkinsv95.github.io/latin-vocab-quiz",
   "version": "0.1.0",
   "private": true,
   "dependencies": {
