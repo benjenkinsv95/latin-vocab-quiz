@@ -30,7 +30,7 @@ const Header = ({ user }) => (
       <div className='row w-100'>
         <div className="col-sm-10 col-md-8 mx-auto">
           <Navbar.Brand href="#" style={{ fontWeight: '700' }}>
-            Latin Vocab Game
+            Latin Vocab Quiz
           </Navbar.Brand>
         </div>
       </div>
