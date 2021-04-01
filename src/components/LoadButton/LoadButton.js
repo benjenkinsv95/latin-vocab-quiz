@@ -7,7 +7,7 @@ import ListGroup from 'react-bootstrap/ListGroup'
 const LoadButton = ({ className, selectedList, selectedLists, updateSelectedList, removeFilter }) => {
   const [selectedFilterName, setSelectedFilterName] = useState(null)
   const [selectedFilter, setSelectedFilter] = useState(null)
-  const [show, setShow] = useState(true)
+  const [show, setShow] = useState(false)
   const handleClose = () => setShow(false)
   const handleShow = () => setShow(true)
 
