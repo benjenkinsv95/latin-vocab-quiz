@@ -28,7 +28,7 @@ const LoadButton = ({ className, selectedList, selectedLists, updateSelectedList
     return (
       <ListGroup.Item key={i} as="li" active={name === selectedFilterName} onClick={handleClick}>
         <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-          <span>{name} {filterList.map((list, i) => <Badge className='mr-1 text-white' key={i} variant="secondary">{list.name}</Badge>)}</span>
+          <span><div><strong>{name}</strong></div> {filterList.map((list, i) => <Badge className='mr-1 text-white' key={i} variant="secondary">{list.name}</Badge>)}</span>
           <Button onClick={handleDelete} variant='danger'>Delete</Button>
         </div>
       </ListGroup.Item>
@@ -63,7 +63,7 @@ const LoadButton = ({ className, selectedList, selectedLists, updateSelectedList
           <Button variant="secondary" className='text-white' onClick={handleClose}>
             Close
           </Button>
-          <Button variant="primary" onClick={handleLoad}>
+          <Button variant="primary" onClick={handleLoad} disabled={!selectedFilterName}>
             Load Filter
           </Button>
         </Modal.Footer>

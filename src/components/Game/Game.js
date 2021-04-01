@@ -144,7 +144,7 @@ const Game = ({ allNotes, uniqueTags }) => {
   // Show the question. With play audio button and what question number we are on
   const questionJsx = correctAnswerNote && allFilteredNotes.length > 4 && (
     <h1 className="mt-3 mb-0 px-2 py-1 bg-secondary text-white">
-      {(isQuestionLatin || showAnswer) && <span style={{ cursor: 'pointer' }} onClick={playAudio}>▶️</span>}
+      {(isQuestionLatin || showAnswer) && correctAnswerNote.soundUrl && <span style={{ cursor: 'pointer' }} onClick={playAudio}>▶️</span>}
       {' '}{correctAnswerNote[questionField]} ({correctAnswerNoteIndex !== 0 ? correctAnswerNoteIndex : questionNotes.length}/{questionNotes.length})
     </h1>
   )
