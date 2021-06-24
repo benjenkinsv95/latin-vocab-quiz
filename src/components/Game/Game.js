@@ -1,4 +1,4 @@
-import React, { useState, useEffect, Fragment } from 'react'
+import React, { useState, useEffect } from 'react'
 
 import useSound from 'use-sound'
 
@@ -238,7 +238,7 @@ const Game = ({ allNotes, uniqueTags }) => {
   return (
     <div className="row h-100">
       <div className={'col-sm-10 col-md-8 mx-auto my-auto bg-white px-3 py-3 rounded w100'}>
-        <Accordion defaultActiveKey="0">
+        <Accordion >
           <h3 className='text-primary'
             style={{ display: 'flex', justifyContent: 'space-between', width: '100%' }}><span>Vocab Quiz</span>
             <Accordion.Toggle as={Button} variant="link" eventKey="1" >
@@ -248,7 +248,7 @@ const Game = ({ allNotes, uniqueTags }) => {
 
           <Card>
             <Accordion.Collapse eventKey="1">
-              <Fragment>
+              <div style={{ margin: '12px' }}>
                 <h4 className='text-secondary'>Question Language</h4>
                 <ListGroup horizontal className='mb-2'>
                   <ListGroup.Item
@@ -284,7 +284,7 @@ const Game = ({ allNotes, uniqueTags }) => {
                     onChange={e => setVolume(e.target.value)}
                   />
                 </Form.Group>
-              </Fragment>
+              </div>
             </Accordion.Collapse>
           </Card>
         </Accordion>
