@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, Fragment } from 'react'
 
 import useSound from 'use-sound'
 
@@ -6,6 +6,7 @@ import ListGroup from 'react-bootstrap/ListGroup'
 import Button from 'react-bootstrap/Button'
 import Accordion from 'react-bootstrap/Accordion'
 import Card from 'react-bootstrap/Card'
+import Form from 'react-bootstrap/Form'
 import { knuthShuffle as shuffle } from 'knuth-shuffle'
 
 import FilterNotes from '../FilterNotes/FilterNotes'
@@ -37,13 +38,17 @@ const Game = ({ allNotes, uniqueTags }) => {
   const questionField = isQuestionLatin ? 'latinField' : 'englishField'
   const answerField = isQuestionLatin ? 'englishField' : 'latinField'
 
+  const [volume, setVolume] = useState(20)
+
   const isSmallScreen = window.innerWidth <= 576
 
   // returns true if the correct answer and selected answer are the same
   const isSelectedAnswerCorrect = () => selectedAnswerNote && correctAnswerNote && selectedAnswerNote.latinField === correctAnswerNote.latinField
 
   // the audio for the current latin word
-  const [playAudio, { stop: stopAudio }] = useSound(correctAnswerNote ? correctAnswerNote.soundUrl : null)
+  const [playAudio, { stop: stopAudio }] = useSound(correctAnswerNote ? correctAnswerNote.soundUrl : null, {
+    volume: volume / 100.0
+  })
 
   // When there are new filtered cards or someone clicks the next question button
   const handleNextQuestion = () => {
@@ -60,7 +65,12 @@ const Game = ({ allNotes, uniqueTags }) => {
       const randomIndex = randomNotes.length === 0 ? correctAnswerNoteIndex : Math.floor(Math.random() * allFilteredNotesCopy.length)
       const randomNote = allFilteredNotesCopy[randomIndex]
       allFilteredNotesCopy.splice(randomIndex, 1)
-      randomNotes.push(randomNote)
+
+      const uniqueAnswer = randomNotes.every(note => note[answerField] !== randomNote[answerField])
+      const uniqueQuestion = randomNotes.every(note => note[questionField] !== randomNote[questionField])
+      if (uniqueAnswer && uniqueQuestion) {
+        randomNotes.push(randomNote)
+      }
     }
 
     // https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/sort
@@ -134,7 +144,7 @@ const Game = ({ allNotes, uniqueTags }) => {
 
     // Add incorrect answers to the state
     if (correctAnswerNote[questionField] !== note[questionField]) {
-      setIncorrectNotes(incorrectNotes => [...incorrectNotes, correctAnswerNote])
+      setIncorrectNotes(incorrectNotes => [...incorrectNotes, correctAnswerNote, note])
     }
 
     // scroll to bottom
@@ -227,32 +237,57 @@ const Game = ({ allNotes, uniqueTags }) => {
 
   return (
     <div className="row h-100">
-      <div className={'col-sm-10 col-md-8 mx-auto my-auto bg-white px-3 py-3 rounded'}>
-        <h3 className='text-primary'>Vocab Quiz</h3>
-        <h4 className='text-secondary'>Question Language</h4>
-        <ListGroup horizontal className='mb-2'>
-          <ListGroup.Item
-            action
-            className={isQuestionLatin && 'text-white bg-primary'}
-            onClick={() => setIsQuestionLatin(true)}>
-            <strong>Latin</strong>
-          </ListGroup.Item>
-          <ListGroup.Item
-            action
-            className={!isQuestionLatin && 'text-white bg-primary'}
-            onClick={() => setIsQuestionLatin(false)}>
-            <strong>English</strong>
-          </ListGroup.Item>
-        </ListGroup>
-        <FilterNotes action allNotes={allNotes} uniqueTags={uniqueTags} setAllFilteredNotes={(filteredNotes) => {
-          setAllFilteredNotes(filteredNotes)
-          setQuestionNotes(filteredNotes)
-          // reset the correct answer index
-          setCorrectAnswerNoteIndex(0)
-          setOnLastAnswer(false)
-          // call handle next question
-          setRequestNextQuestion(true)
-        }} />
+      <div className={'col-sm-10 col-md-8 mx-auto my-auto bg-white px-3 py-3 rounded w100'}>
+        <Accordion defaultActiveKey="0">
+          <h3 className='text-primary'
+            style={{ display: 'flex', justifyContent: 'space-between', width: '100%' }}><span>Vocab Quiz</span>
+            <Accordion.Toggle as={Button} variant="link" eventKey="1" >
+              Settings
+            </Accordion.Toggle>
+          </h3>
+
+          <Card>
+            <Accordion.Collapse eventKey="1">
+              <Fragment>
+                <h4 className='text-secondary'>Question Language</h4>
+                <ListGroup horizontal className='mb-2'>
+                  <ListGroup.Item
+                    action
+                    className={isQuestionLatin && 'text-white bg-primary'}
+                    onClick={() => setIsQuestionLatin(true)}>
+                    <strong>Latin</strong>
+                  </ListGroup.Item>
+                  <ListGroup.Item
+                    action
+                    className={!isQuestionLatin && 'text-white bg-primary'}
+                    onClick={() => setIsQuestionLatin(false)}>
+                    <strong>English</strong>
+                  </ListGroup.Item>
+                </ListGroup>
+                <FilterNotes action allNotes={allNotes} uniqueTags={uniqueTags} setAllFilteredNotes={(filteredNotes) => {
+                  setAllFilteredNotes(filteredNotes)
+                  setQuestionNotes(filteredNotes)
+                  // reset the correct answer index
+                  setCorrectAnswerNoteIndex(0)
+                  setOnLastAnswer(false)
+                  // call handle next question
+                  setRequestNextQuestion(true)
+                }} />
+                <Form.Group controlId="formBasicVolume">
+                  <Form.Label>Volume</Form.Label>
+                  <Form.Control
+                    type="number"
+                    min="0"
+                    value={volume}
+                    max="100"
+                    placeholder="Volume"
+                    onChange={e => setVolume(e.target.value)}
+                  />
+                </Form.Group>
+              </Fragment>
+            </Accordion.Collapse>
+          </Card>
+        </Accordion>
         {questionJsx}
         <ListGroup className='mb-1'>
           {possibleAnswerNotesJsx}
